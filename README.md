@@ -19,7 +19,7 @@ have neither, and only about half use any risk management at all
 (Monteiro et al., 2022).
 
 The brief was to design a structured risk framework from first principles that
-a student team can use with a spreadsheet and some basic Python.
+suitable for student teams to use.
 
 ## How it works
 
@@ -88,52 +88,6 @@ technical killers: power, first contact and radiation. That matches the student
 CubeSat failure literature the project used (Swartwout, 2013;
 Langer and Bouwmeester, 2016).
 
-## Post-submission review
-
-After submitting, I went back through the spreadsheets and the report and found
-errors in the Fuzzy TOPSIS stage, which was my part of the project. The report in
-[`report/`](report/) is left exactly as submitted. This repository contains the
-corrected implementation.
-
-**What was wrong**
-
-- **The ranking was inverted.** The spreadsheet compared each failure mode with
-  the column *minimum* as the ideal and computed CC = d⁻ / (d⁺ + d⁻). A high CC
-  therefore meant *low* risk, but the report read it as high risk. Across the
-  register, the spreadsheet's CC correlated at −0.92 with a simple weighted
-  S/O/D score.
-- **A blank cell became the #1 risk.** *Funding Delays* had no Severity values.
-  The blanks were read as 0, and the inverted ranking put it at the top.
-- **A normalisation formula referenced the wrong column.** The upper bound for
-  Occurrence pointed to the lower bound, which produced invalid fuzzy numbers
-  (upper < middle). The divisor was also left over from an earlier, smaller
-  version of the sheet.
-- **The data and the report drifted apart.** The decision matrix had 54 rows
-  against 48 in the FMEA register (leftover test rows and a duplicate), some IDs
-  and descriptions were swapped in the results table, and the method text
-  described different reference points than the sheet actually used.
-- **The sensitivity check was too small to show much.** It was run on 5 failure
-  modes and reported a maximum shift of one rank. Across all 48, the ranks move a
-  lot when the weights change. For example, *Knowledge loss* moves from 38th to
-  9th with equal weights, and 28 failure modes move more than three places. The
-  weights matter, which is a reason to choose them carefully.
-
-**What I changed**
-
-- I rebuilt the register from the FMEA sheet: one row per failure mode, clean
-  IDs, and the original spreadsheet ID kept in `legacy_id` for traceability.
-- I reimplemented Fuzzy TOPSIS in Python, with both reference points weighted
-  the same way as the data, so CC = 1 means the worst rating on every criterion.
-- I added tests, including one that checks that raising any rating never lowers
-  a failure mode's priority. The submitted spreadsheet fails that check.
-- The Fuzzy AHP stage was correct and is unchanged. The tests confirm it
-  reproduces the report's weights and consistency ratio exactly.
-
-**What I learned:** a spreadsheet that runs without errors can still be wrong.
-A validation step that only checks that values fall in the expected range
-(CC between 0 and 1) does not catch a result that points the wrong way. Small
-property tests, such as "worse ratings give higher risk", would have caught
-every one of these errors early.
 
 ## Repository structure
 
